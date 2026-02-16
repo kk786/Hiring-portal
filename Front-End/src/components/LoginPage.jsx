@@ -37,21 +37,44 @@ const LoginPage = () => {
     };
 
     // Submit Handler (Step 1 Only)
-    const handleSubmit = (e) => {
-        e.preventDefault();
+const handleSubmit = async (e) => { // 1. Added async
+    e.preventDefault();
+    setError("");
 
-        setError("");
+    const validationError = validate();
+    if (validationError) {
+        setError(validationError);
+        return;
+    }
 
-        const validationError = validate();
+    try {
+        // 2. Determine which URL to call based on isSignup
+        const endpoint = isSignup ? "/register" : "/login";
+        const url = `http://localhost:5001/api/users${endpoint}`;
 
-        if (validationError) {
-            setError(validationError);
-            return;
+        // 3. Send the request
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert(isSignup ? "Account created! Please login." : "Logged in successfully!");
+            if (isSignup) setIsSignup(false); // Switch to login view after successful signup
+        } else {
+            // 4. Show the error from the Backend (e.g., "User already exists")
+            setError(data.message || "Something went wrong");
         }
-
-        console.log("Form Data:", formData);
-        alert("Valid form. Backend will be added in Step 2.");
-    };
+    } catch (err) {
+        // 5. Handle network errors or server not running
+        setError("Cannot connect to server. Is it running on port 5001?");
+    }
+};
 
     return (
         <div className="app-bg">
