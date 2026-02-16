@@ -1,11 +1,5 @@
+
 @import "tailwindcss";
-
-
-/* ===============================
-   Custom Reusable Utilities
-   =============================== */
-
-/* App Background */
 .app-bg {
     @apply min-h-screen flex items-center justify-center
     bg-gradient-to-br from-gray-900 via-gray-800 to-black;
