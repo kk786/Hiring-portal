@@ -1,6 +1,8 @@
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import generateTokens from "../utils/generateTokens.js";
+
 
 // @desc    Register new user
 // @route   POST /api/auth/register
@@ -97,13 +99,11 @@ export const loginUser = async (req, res) => {
         // Send response
         res.status(200).json({
             message: "Login successful",
-            token,
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-            },
+            userId: user._id,
+            email: user.email,
+            token: generateTokens(user._id),
         });
+
 
     } catch (error) {
         console.error(error);
