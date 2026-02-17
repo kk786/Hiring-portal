@@ -1,12 +1,27 @@
-import React from 'react';
-import LoginPage from "./components/LoginPage.jsx";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import LoginPage from "./components/LoginPage";
+import Dashboard from "./components/Dashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-const App = () => {
+function App() {
     return (
-        <div>
-            <LoginPage />
-        </div>
+        <BrowserRouter>
+            <Routes>
+
+                <Route path="/" element={<LoginPage />} />
+
+                <Route
+                    path="/dashboard"
+                    element={
+                        <ProtectedRoute>
+                            <Dashboard />
+                        </ProtectedRoute>
+                    }
+                />
+
+            </Routes>
+        </BrowserRouter>
     );
-};
+}
 
 export default App;
