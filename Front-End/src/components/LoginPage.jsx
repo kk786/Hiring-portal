@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useContext} from "react";
 import { registerUser, loginUser } from "../services/authService";
 import { useNavigate } from "react-router-dom";
-
+import {AuthContext} from "../context/AuthContext.jsx";
 
 const LoginPage = () => {
+
+    const {login} = useContext(AuthContext);
 
     const navigate = useNavigate();
 
@@ -25,6 +27,7 @@ const LoginPage = () => {
             [e.target.name]: e.target.value,
         });
     };
+
 
     // Submit handler (Login + Register)
     const handleSubmit = async (e) => {
@@ -56,8 +59,13 @@ const LoginPage = () => {
             } else {
                 data = await loginUser(formData);
 
+                login(data.user, data.token);
+
                 // Save token
-                localStorage.setItem("token", data.token);
+                // localStorage.setItem("token", data.token);
+
+                // Save user info
+                // localStorage.setItem("user", JSON.stringify(data.user));
 
                 navigate("/dashboard");
 
