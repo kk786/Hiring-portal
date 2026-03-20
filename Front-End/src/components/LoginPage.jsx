@@ -1,6 +1,14 @@
-import { useState } from "react";
+import { useState, useContext} from "react";
+import { registerUser, loginUser } from "../services/authService";
+import { useNavigate } from "react-router-dom";
+import {AuthContext} from "../context/AuthContext.jsx";
 
 const LoginPage = () => {
+
+    const {login} = useContext(AuthContext);
+
+    const navigate = useNavigate();
+
     const [isSignup, setIsSignup] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -10,8 +18,9 @@ const LoginPage = () => {
     });
 
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
-    // Handle Input Change
+    // Handle input change
     const handleChange = (e) => {
         setFormData({
             ...formData,
@@ -19,38 +28,58 @@ const LoginPage = () => {
         });
     };
 
-    // Basic Validation
-    const validate = () => {
-        if (isSignup && !formData.name.trim()) {
-            return "Name is required";
-        }
 
-        if (!formData.email.trim()) {
-            return "Email is required";
-        }
-
-        if (!formData.password.trim()) {
-            return "Password is required";
-        }
-
-        return "";
-    };
-
-    // Submit Handler (Step 1 Only)
-    const handleSubmit = (e) => {
+    // Submit handler (Login + Register)
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         setError("");
 
-        const validationError = validate();
-
-        if (validationError) {
-            setError(validationError);
-            return;
+        // Validation
+        if (isSignup && !formData.name.trim()) {
+            return setError("Name is required");
         }
 
-        console.log("Form Data:", formData);
-        alert("Valid form. Backend will be added in Step 2.");
+        if (!formData.email.trim()) {
+            return setError("Email is required");
+        }
+
+        if (!formData.password.trim()) {
+            return setError("Password is required");
+        }
+
+        try {
+            setLoading(true);
+
+            let data;
+
+            if (isSignup) {
+                data = await registerUser(formData);
+                alert("Registration successful!");
+            } else {
+                data = await loginUser(formData);
+
+                login(data.user, data.token);
+
+                // Save token
+                // localStorage.setItem("token", data.token);
+
+                // Save user info
+                // localStorage.setItem("user", JSON.stringify(data.user));
+
+                navigate("/dashboard");
+
+            }
+
+            console.log("Response:", data);
+
+        } catch (err) {
+            setError(
+                err.response?.data?.message || "Something went wrong"
+            );
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -78,6 +107,7 @@ const LoginPage = () => {
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-4">
 
+                    {/* Name (Signup only) */}
                     {isSignup && (
                         <div>
                             <label className="auth-label">Name</label>
@@ -85,42 +115,53 @@ const LoginPage = () => {
                             <input
                                 type="text"
                                 name="name"
-                                placeholder="Enter your name"
                                 value={formData.name}
                                 onChange={handleChange}
+                                placeholder="Enter your name"
                                 className="auth-input"
                             />
                         </div>
                     )}
 
+                    {/* Email */}
                     <div>
                         <label className="auth-label">Email</label>
 
                         <input
                             type="email"
                             name="email"
-                            placeholder="Enter your email"
                             value={formData.email}
                             onChange={handleChange}
+                            placeholder="Enter your email"
                             className="auth-input"
                         />
                     </div>
 
+                    {/* Password */}
                     <div>
                         <label className="auth-label">Password</label>
 
                         <input
                             type="password"
                             name="password"
-                            placeholder="Enter your password"
                             value={formData.password}
                             onChange={handleChange}
+                            placeholder="Enter your password"
                             className="auth-input"
                         />
                     </div>
 
-                    <button type="submit" className="auth-btn">
-                        {isSignup ? "Sign Up" : "Login"}
+                    {/* Button */}
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="auth-btn"
+                    >
+                        {loading
+                            ? "Please wait..."
+                            : isSignup
+                                ? "Sign Up"
+                                : "Login"}
                     </button>
 
                 </form>
@@ -128,7 +169,10 @@ const LoginPage = () => {
                 {/* Switch */}
                 <p
                     className="auth-switch"
-                    onClick={() => setIsSignup(!isSignup)}
+                    onClick={() => {
+                        setIsSignup(!isSignup);
+                        setError("");
+                    }}
                 >
                     {isSignup
                         ? "Already have an account? Login"

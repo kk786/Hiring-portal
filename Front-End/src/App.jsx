@@ -1,22 +1,33 @@
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "./components/LoginPage.jsx";
 import Forget_pass from './components/Forget_pass.jsx';
 import Employer from "./components/Employer.jsx";
+import Dashboard from "./components/Dashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-const App = () => {
-    return (
+import Layout from './components/Layout.jsx';
 
-       <BrowserRouter>
+
+function App() {
+    return (  
+      
       <Routes>
-        
+        <Route path="/" element={<Layout />}></Route>
         <Route path="/Employer" element={<Employer />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forget-pass" element={<Forget_pass />} />
+        <Route
+                    path="/dashboard"
+                    element={
+                        <ProtectedRoute>
+                            <Dashboard />
+                        </ProtectedRoute>
+                    }
+                />
       </Routes>
-    </BrowserRouter>
+   
 
     );
-};
+}
 
 export default App;
